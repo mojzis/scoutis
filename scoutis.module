@@ -2,21 +2,78 @@
 /**
  * @file
  * Description here.
+ * @todo login integration
+ * @todo session for storage ?
  */
+
+/*  TODO
+- integration class to hold all the stuff (?)
+- config form
+- skautIS login /out / info block
+- login page with a token from skautis
+-
+
+*/
+
+
 
 /**
  * hook_menu
  */
 function scoutis_menu() {
   $items = array();
-  $items['/admin/config/scoutis'] = array(
+  $items['admin/config/scoutis'] = array(
     'title' => 'scoutis config',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('scoutis_config'),
-    'access callback' => 'user_access',
+    'page arguments' => array('scoutis_config_form'),
     'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
     'file' => 'scoutis.admin.inc',
   );
+  return $items;
+}
 
-  // return $items;
+/**
+ * hook_libraries_info
+ */
+function scoutis_libraries_info() {
+  $libraries['skautis'] = array(
+    'name' => t('Connection to SkautIS'),
+    'vendor url' => 'https://github.com/sinacek/SkautIS',
+    'download url' => 'https://github.com/sinacek/SkautIS/downloads', // archive/master.tar.gz
+    'version callback' => 'scoutis_libversion',
+    'files' => array(
+      'php' => array(
+        'SkautIS.php',
+        'SkautIS_WS.php',
+        'SkautIS_exceptions.php',
+      ),
+    ),
+/*
+    'integration files' => array(
+      'scoutis' => array(
+        'php' => array('SkautIS.php'),
+      ),
+    ),
+*/
+  );
+  return $libraries;
+}
+/**
+ * test call to skautIS, provides a skautis link
+ */
+function scoutis_link() {
+  global $base_url;
+  libraries_load('skautis');
+  $si = SkautIS::getInstance(variable_get('scoutis_SISID','1234'));
+  $backlink = $base_url .'/'. variable_get('scoutis_login','sislogin');
+  $sislink = $si->getLoginUrl($backlink);
+  return l(t('Login into SkautIS'),$sislink);
+}
+
+/**
+ * libraries API version callback hack. probably not necessary ?
+ */
+function scoutis_libversion($lib,$other) {
+  return '1';
 }
