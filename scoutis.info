@@ -2,4 +2,4 @@ name = scoutis
 description = Integration with the SkautIS
 core = 7.x
 dependencies[] = libraries
-#configure = admin/config/scoutis
+configure = admin/config/scoutis

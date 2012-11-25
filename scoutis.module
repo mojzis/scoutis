@@ -11,7 +11,9 @@
 - config form
 - skautIS login /out / info block
 - login page with a token from skautis
--
+- keep checking skautis login on every page request (later for selected roles only)
+- set roles in drupal according to skautis
+- allow to change skatis role
 
 */
 
@@ -30,6 +32,13 @@ function scoutis_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'scoutis.admin.inc',
   );
+  $items['sislogin'] = array(
+    'title' => 'SkautIS login',
+    'page callback' => 'scoutis_sislogin',
+    'access callback' => true,
+    'type' => MENU_CALLBACK,
+    'file' => 'scoutis.page.inc'
+    );
   return $items;
 }
 
@@ -45,29 +54,71 @@ function scoutis_libraries_info() {
     'files' => array(
       'php' => array(
         'SkautIS.php',
-        'SkautIS_WS.php',
-        'SkautIS_exceptions.php',
+        //'SkautIS_WS.php',
+        //'SkautIS_exceptions.php',
       ),
     ),
-/*
     'integration files' => array(
       'scoutis' => array(
-        'php' => array('SkautIS.php'),
+        'php' => array('includes/scoutis.integration.inc'),
       ),
     ),
-*/
   );
   return $libraries;
 }
+
+function scoutis_block_info(){
+  $blocks = array();
+  $blocks['scoutis_login'] = array(
+    'info' => t('SkautIS login'),
+    );
+  return $blocks;
+}
+
+function scoutis_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'scoutis_login':
+      $block = scoutis_login_block();
+      break;
+  }
+  return $block;
+}
+
+function scoutis_login_block(){
+  global $user;
+  libraries_load('skautis');
+  $block = array();
+  $block['subject'] = t('Login into SkautIS');
+  if ($user->uid == 0) {
+    $scout = new ScoutIS();
+    $href = $scout->skautLink();
+    $l = l(t('Login into SkautIS'),$sislink);
+  } else {
+    // logout
+    $l= 'logout TBD';
+  }
+
+  $block['content'] = $l;
+  return $block;
+}
+
 /**
  * test call to skautIS, provides a skautis link
+ * todo: in case we are logged in, create logout link
+ * @todo move into integration class
  */
 function scoutis_link() {
   global $base_url;
   libraries_load('skautis');
-  $si = SkautIS::getInstance(variable_get('scoutis_SISID','1234'));
-  $backlink = $base_url .'/'. variable_get('scoutis_login','sislogin');
-  $sislink = $si->getLoginUrl($backlink);
+  $si = SkautIS::getInstance(
+    variable_get('scoutis_SISID','1234'),
+    variable_get('scoutis_testenv', true));
+  $url = variable_get('scoutis_backlink','');
+  //$backlink = $url ? $url : $base_url;
+  // todo: sislogin path into a constant ?
+  //$backlink .= '/'. variable_get('scoutis_login','sislogin');
+  $sislink = $si->getLoginUrl();
   return l(t('Login into SkautIS'),$sislink);
 }
 
