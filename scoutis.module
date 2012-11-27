@@ -93,7 +93,7 @@ function scoutis_login_block(){
   if ($user->uid == 0) {
     $scout = new ScoutIS();
     $href = $scout->skautLink();
-    $l = l(t('Login into SkautIS'),$sislink);
+    $l = l(t('Login into SkautIS'),$href);
   } else {
     // logout
     $l= 'logout TBD';

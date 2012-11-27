@@ -3,7 +3,11 @@
  *
  * https://is.skaut.cz/JunakWebservice/UserManagement.asmx?op=UserDetail
  */
-
+/**
+ * scoutis_login : page callback
+ * @todo clear respective sessions before an attempt for login
+ * @todo an ajax to obtain sis token
+ */
 function scoutis_sislogin() {
   $content = '';
   $content = 'connection test';
